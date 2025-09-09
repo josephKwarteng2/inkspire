@@ -21,9 +21,10 @@ const PostDetail = lazy(() => import("@/pages/BlogDetail"));
 const AdminDashboard = lazy(() => import("@/pages/admin/Dashboard"));
 const AdminPosts = lazy(() => import("@/pages/admin/Blogs"));
 const AdminAnalytics = lazy(() => import("@/pages/admin/Analytics"));
-const AdminPostEditor = lazy(() => import("@/pages/admin/PostEditor"));
+const AdminPostEditor = lazy(() => import("@/pages/admin/BlogEditor"));
 const AdminCategories = lazy(() => import("@/pages/admin/categories"));
 const AdminComments = lazy(() => import("@/pages/admin/BlogComments"));
+import AdminLayout from "@/pages/admin/Layout";
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -36,6 +37,19 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 }
 
 const queryClient = new QueryClient();
+
+function AdminRoutes() {
+  return (
+    <Routes>
+      <Route path="dashboard" element={<AdminDashboard />} />
+      <Route path="posts" element={<AdminPosts />} />
+      <Route path="categories" element={<AdminCategories />} />
+      <Route path="analytics" element={<AdminAnalytics />} />
+      <Route path="posts/:id" element={<AdminPostEditor />} />
+      <Route path="comments" element={<AdminComments />} />
+    </Routes>
+  );
+}
 
 const AppRoutes = () => (
   <UserRoleProvider>
@@ -96,52 +110,14 @@ const AppRoutes = () => (
                   </RequireAuth>
                 }
               />
-              {/* Admin routes */}
+              {/* Admin routes with Next.js-style layout */}
               <Route
-                path="/admin/dashboard"
+                path="/admin/*"
                 element={
                   <RequireAuth>
-                    <AdminDashboard />
-                  </RequireAuth>
-                }
-              />
-              <Route
-                path="/admin/posts"
-                element={
-                  <RequireAuth>
-                    <AdminPosts />
-                  </RequireAuth>
-                }
-              />
-              <Route
-                path="/admin/categories"
-                element={
-                  <RequireAuth>
-                    <AdminCategories />
-                  </RequireAuth>
-                }
-              />
-              <Route
-                path="/admin/analytics"
-                element={
-                  <RequireAuth>
-                    <AdminAnalytics />
-                  </RequireAuth>
-                }
-              />
-              <Route
-                path="/admin/posts/:id"
-                element={
-                  <RequireAuth>
-                    <AdminPostEditor />
-                  </RequireAuth>
-                }
-              />
-              <Route
-                path="/admin/comments"
-                element={
-                  <RequireAuth>
-                    <AdminComments />
+                    <AdminLayout>
+                      <AdminRoutes />
+                    </AdminLayout>
                   </RequireAuth>
                 }
               />

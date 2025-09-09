@@ -5,7 +5,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import type { Post } from "@/types/post";
 import { categories as defaultCategories } from "@/data/categories";
-import AdminLayout from "./Layout";
 import PostList from "@/components/post/BlogList";
 import AdminPostsTableSkeleton from "@/components/post/TableSkeleton";
 import AdminCategories from "./BlogCategories";
@@ -199,11 +198,7 @@ const BlogContent: React.FC = () => {
 };
 
 const Blogs: React.FC = () => {
-  return (
-    <AdminLayout>
-      <BlogContent />
-    </AdminLayout>
-  );
+  return <BlogContent />;
 };
 
 export default Blogs;
