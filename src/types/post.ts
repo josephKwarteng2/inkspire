@@ -31,6 +31,11 @@ export interface PostRevision {
   content: string;
   createdAt: string;
   author: string;
+  updatedAt?: string;
+  slug?: string;
+  status?: PostStatus;
+  category?: string;
+  tags?: string[];
 }
 
 export interface FilterState {
