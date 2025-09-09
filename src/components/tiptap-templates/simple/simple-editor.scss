@@ -1,0 +1,84 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
+:root {
+  --white: #fff;
+  --black: #18181b;
+  --tt-gray-dark-50: #232326;
+}
+
+.simple-editor-wrapper {
+  --tt-button-default-bg-color: var(--background);
+  --tt-button-default-text-color: var(--foreground);
+  --tt-button-default-icon-color: var(--muted-foreground);
+  --tt-button-hover-bg-color: var(--muted);
+  --tt-button-hover-text-color: var(--foreground);
+  --tt-button-hover-icon-color: var(--foreground);
+  --tt-button-active-bg-color: var(--accent);
+  --tt-button-active-text-color: var(--foreground);
+  --tt-button-active-icon-color: var(--foreground);
+  --tt-button-disabled-bg-color: var(--muted);
+  --tt-button-disabled-text-color: var(--muted-foreground);
+  --tt-button-disabled-icon-color: var(--muted-foreground);
+
+  --tt-toolbar-height: 44px;
+  --tt-theme-text: var(--foreground);
+  overscroll-behavior-x: none;
+  height: 100%;
+
+  .dark & {
+    --tt-theme-text: var(--tt-gray-dark-900);
+  }
+}
+
+.simple-editor-wrapper {
+  & ::-webkit-scrollbar {
+    width: 0.25rem;
+  }
+  & * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--tt-scrollbar-color) transparent;
+  }
+  & ::-webkit-scrollbar-thumb {
+    background-color: var(--tt-scrollbar-color);
+    border-radius: 9999px;
+  }
+  & ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .tiptap.ProseMirror {
+    font-family: inherit !important;
+    font-size: inherit !important;
+  }
+}
+
+.simple-editor-wrapper {
+  width: 100%;
+  height: 50vh;
+  overflow: auto;
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
+.simple-editor-content {
+  max-width: 648px;
+  width: 100%;
+  margin: 0 auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.simple-editor-content .tiptap.ProseMirror.simple-editor {
+  flex: 1;
+  padding: 3rem 3rem 30vh;
+}
+
+@media screen and (max-width: 480px) {
+  .simple-editor-content .tiptap.ProseMirror.simple-editor {
+    padding: 1rem 1.5rem 30vh;
+  }
+}

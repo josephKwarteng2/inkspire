@@ -19,11 +19,11 @@ const AboutUs = lazy(() => import("@/pages/AboutUs"));
 const ContactUs = lazy(() => import("@/pages/ContactUs"));
 const PostDetail = lazy(() => import("@/pages/PostDetail"));
 const AdminDashboard = lazy(() => import("@/pages/admin/Dashboard"));
-const AdminPosts = lazy(() => import("@/pages/admin/AdminPosts"));
+const AdminPosts = lazy(() => import("@/pages/admin/Blogs"));
 const AdminAnalytics = lazy(() => import("@/pages/admin/Analytics"));
 const AdminPostEditor = lazy(() => import("@/pages/admin/PostEditor"));
 const AdminCategories = lazy(() => import("@/pages/admin/categories"));
-const AdminComments = lazy(() => import("@/pages/admin/AdminComments"));
+const AdminComments = lazy(() => import("@/pages/admin/BlogComments"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
