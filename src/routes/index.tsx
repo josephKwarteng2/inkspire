@@ -17,7 +17,7 @@ const Home = lazy(() => import("@/pages/Home"));
 const Blog = lazy(() => import("@/pages/Blog"));
 const AboutUs = lazy(() => import("@/pages/AboutUs"));
 const ContactUs = lazy(() => import("@/pages/ContactUs"));
-const PostDetail = lazy(() => import("@/pages/PostDetail"));
+const PostDetail = lazy(() => import("@/pages/BlogDetail"));
 const AdminDashboard = lazy(() => import("@/pages/admin/Dashboard"));
 const AdminPosts = lazy(() => import("@/pages/admin/Blogs"));
 const AdminAnalytics = lazy(() => import("@/pages/admin/Analytics"));
