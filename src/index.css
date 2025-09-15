@@ -13,13 +13,12 @@
   line-height: 1.5;
   font-weight: 400;
   font-family: "Sen", system-ui, sans-serif;
-
   color-scheme: light dark;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  --font-size-base: 16px;
   --lavender: #f4f0f8;
   --background: #fcfcfc;
   --foreground: #171717;
@@ -45,7 +44,7 @@
   --chart-3: #8b5cf6;
   --chart-4: #f59e0b;
   --chart-5: #10b981;
-  --sidebar: #fcfcfc;
+  --sidebar: #f7f7f7;
   --sidebar-foreground: #707070;
   --sidebar-primary: #72e3ad;
   --sidebar-primary-foreground: #1e2723;
@@ -100,7 +99,7 @@
   --chart-3: #a78bfa;
   --chart-4: #fbbf24;
   --chart-5: #2dd4bf;
-  --sidebar: #121212;
+  --sidebar: #1c1c1c;
   --sidebar-foreground: #898989;
   --sidebar-primary: #006239;
   --sidebar-primary-foreground: #dde8e3;
@@ -191,6 +190,7 @@ body {
   font-weight: 500;
   color: var(--primary);
   text-decoration: inherit;
+  font-size: var(--font-size-base);
 
   h1,
   h2,
