@@ -30,6 +30,7 @@ const InkspireHeader = () => {
   const navigationItems = [
     { label: "Home", href: "/" },
     { label: "Blog", href: "/blog" },
+    { label: "Bookmarks", href: "/bookmarks" },
     { label: "About Us", href: "/about-us" },
     { label: "Contact us", href: "/contact-us" },
   ];
