@@ -1,11 +1,13 @@
-import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
+import { fadeIn, staggerContainer } from "@/lib/animation";
+import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
+import { motion } from "framer-motion";
 import type { JSX } from "react";
 import {
   FaFacebookF,
-  FaTwitter,
   FaInstagram,
   FaLinkedinIn,
-} from "react-icons/fa";
+  FaTwitter,
+} from "react-icons/fa6";
 
 type Social = "facebook" | "twitter" | "instagram" | "linkedin";
 
@@ -53,23 +55,37 @@ const socialIcons: Record<Social, JSX.Element> = {
 };
 
 const logos = [
-  "/logos/logo1.svg",
-  "/logos/logo2.svg",
-  "/logos/logo3.svg",
-  "/logos/logo4.svg",
-  "/logos/logo5.svg",
-  "/logos/logo6.svg",
+  "/logo-1.svg",
+  "/logo-2.svg",
+  "/logo-3.svg",
+  "/logo-4.svg",
+  "/logo-5.svg",
 ];
 
 const Authors = () => (
-  <section className="w-full py-16 px-2 sm:px-6 lg:px-12 xl:px-24 2xl:px-32">
-    <h2 className="text-3xl font-extrabold text-center mb-12 text-foreground">
+  <motion.section
+    initial="hidden"
+    whileInView="visible"
+    viewport={{ once: true }}
+    variants={fadeIn}
+    className="w-full py-16 px-2 sm:px-6 lg:px-12 xl:px-24 2xl:px-32"
+  >
+    <motion.h2
+      variants={fadeIn}
+      className="text-3xl font-extrabold text-center mb-12 text-foreground"
+    >
       List of Authors
-    </h2>
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+    </motion.h2>
+    <motion.div
+      variants={staggerContainer}
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16"
+    >
       {authors.map((author) => (
-        <div
+        <motion.div
           key={author.name}
+          variants={fadeIn}
+          whileHover={{ y: -5, boxShadow: "0 10px 25px rgba(0,0,0,0.1)" }}
+          transition={{ duration: 0.2 }}
           className={`flex flex-col items-center bg-muted rounded-lg p-8 text-center shadow-sm ${
             author.featured ? "bg-yellow-50" : ""
           }`}
@@ -84,30 +100,46 @@ const Authors = () => (
           <div className="text-muted-foreground mb-4">{author.role}</div>
           <div className="flex gap-4 justify-center">
             {author.socials.map((social) => (
-              <a
+              <motion.a
                 key={social}
+                whileHover={{ scale: 1.2, color: "#6C3DCE" }}
                 href="#"
                 className="text-foreground hover:text-primary transition"
               >
                 {socialIcons[social]}
-              </a>
+              </motion.a>
             ))}
           </div>
-        </div>
+        </motion.div>
       ))}
-    </div>
-    <div className="w-full flex flex-col items-center gap-4">
+    </motion.div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      transition={{ delay: 0.4 }}
+      viewport={{ once: true }}
+      className="w-full flex flex-col items-center gap-4"
+    >
       <div className="text-muted-foreground text-base flex items-center gap-2">
         <span className="font-medium">We are</span>
         <span className="font-bold text-foreground">Featured in</span>
       </div>
-      <div className="flex flex-wrap justify-center items-center gap-8 mt-2">
+      <div className="flex flex-wrap justify-center items-center gap-18 mt-2">
         {logos.map((logo, idx) => (
-          <img key={idx} src={logo} alt="logo" className="h-8 w-auto" />
+          <motion.img
+            key={idx}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ delay: idx * 0.1 }}
+            viewport={{ once: true }}
+            src={logo}
+            alt="logo"
+            className="h-8 w-auto"
+          />
         ))}
       </div>
-    </div>
-  </section>
+    </motion.div>
+  </motion.section>
 );
 
 export default Authors;
