@@ -64,7 +64,7 @@ const CategorySelector = ({
                 isActive ? "text-accent-foreground" : "text-muted-foreground"
               }`}
             >
-              {cat.desc}
+              {cat.description}
             </p>
           </div>
         );
