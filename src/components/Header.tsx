@@ -1,4 +1,3 @@
-import { useState } from "react";
 import React from "react";
 import { Button } from "../components/ui/button";
 import { UserRoleDropdown } from "./UserRoleDropdown";
@@ -9,7 +8,7 @@ import { Menu, X } from "lucide-react";
 
 const InkspireHeader = () => {
   const navigate = useNavigate();
-  const [theme, setTheme] = useState(
+  const [theme, setTheme] = React.useState(
     typeof window !== "undefined" &&
       window.localStorage.getItem("theme") === "dark"
       ? "dark"
@@ -25,7 +24,7 @@ const InkspireHeader = () => {
       window.localStorage.setItem("theme", "light");
     }
   }, [theme]);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
   const navigationItems = [
     { label: "Home", href: "/" },
@@ -41,7 +40,7 @@ const InkspireHeader = () => {
         <div className="flex flex-wrap justify-between items-center h-16 min-h-[4rem]">
           <div className="flex-shrink-0 flex items-center py-2 gap-3">
             <h1 className="font-bold text-xl font-sans whitespace-nowrap logo-inkspire">
-              {"{"}Inkspire
+              {"{"}Inkspire{"}"}
             </h1>
             <Toggle
               aria-label="Toggle theme"
