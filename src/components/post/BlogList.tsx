@@ -20,7 +20,14 @@ import PostStats from "./BlogStats";
 import PostFiltersToolbar from "./BlogFiltersToolbar";
 import BulkActionDialogs from "./BulkActionDialogs";
 import PostTable from "./BlogTable";
-import PostPagination from "./BlogPagination";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import PostPreview from "./BlogPreview";
 import PostHistoryDialog from "./BlogHistoryDialog";
 import EmptyPostsLottie from "./EmptyPostsLottie";
@@ -28,13 +35,17 @@ import { ErrorBoundary } from "./ErrorBoundary";
 
 interface PostListProps extends PostActions, PostFilters {
   posts: Post[];
+  onBulkDelete?: (ids: string[]) => void;
+  onBulkPermanentDelete?: (ids: string[]) => void;
 }
 
 const BlogList: React.FC<PostListProps> = ({
   posts,
   onEdit,
   onDelete,
+  onBulkDelete,
   onPermanentDelete,
+  onBulkPermanentDelete,
   onPublish,
   onDuplicate,
   onBulkPublish,
@@ -51,7 +62,7 @@ const BlogList: React.FC<PostListProps> = ({
   const [scrolledX, setScrolledX] = React.useState(false);
 
   const [filters, dispatch] = useFilterReducer();
-  const { paginatedPosts } = usePostFilters(posts, filters);
+  const { paginatedPosts, filteredPosts } = usePostFilters(posts, filters);
   const {
     selectedPosts,
     selectAll,
@@ -151,7 +162,13 @@ const BlogList: React.FC<PostListProps> = ({
   const handleBulkPublish = () => setShowPublishDialog(true);
 
   const confirmBulkDelete = () => {
-    selectedPosts.forEach((postId) => onDelete(postId));
+    if (filters.viewFilter === "trashed" && onBulkPermanentDelete) {
+      onBulkPermanentDelete(Array.from(selectedPosts));
+    } else if (onBulkDelete) {
+      onBulkDelete(Array.from(selectedPosts));
+    } else {
+      selectedPosts.forEach((postId) => onDelete(postId));
+    }
     clearSelection();
     setShowDeleteDialog(false);
   };
@@ -259,7 +276,7 @@ const BlogList: React.FC<PostListProps> = ({
           ) : (
             <div
               ref={tableScrollRef}
-              className={`table-scroll-x w-full${
+              className={`w-full overflow-x-auto scrollbar-hide${
                 scrolledX ? " scrolled-x" : ""
               }`}
             >
@@ -267,7 +284,7 @@ const BlogList: React.FC<PostListProps> = ({
                 posts={paginatedPosts}
                 selectedPosts={selectedPosts}
                 selectAll={selectAll}
-                onSelectAll={() => handleSelectAll(paginatedPosts)}
+                onSelectAll={() => handleSelectAll(filteredPosts)}
                 onSelect={handleSelectPost}
                 role={role}
                 onEdit={onEdit}
@@ -285,14 +302,47 @@ const BlogList: React.FC<PostListProps> = ({
           )}
         </div>
 
-        <PostPagination
-          currentPage={filters.currentPage}
-          totalPages={totalPages}
-          postsPerPage={filters.postsPerPage}
-          onPageChange={handlePageChange}
-          onPostsPerPageChange={handlePostsPerPageChange}
-          totalPosts={posts.length}
-        />
+        {posts.length > 0 && (
+          <div className="flex justify-center items-center gap-2 mt-4">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handlePageChange(filters.currentPage - 1)}
+              disabled={filters.currentPage === 1}
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              Page {filters.currentPage} of {totalPages}
+            </span>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handlePageChange(filters.currentPage + 1)}
+              disabled={filters.currentPage === totalPages}
+            >
+              Next
+            </Button>
+            <Select
+              value={String(filters.postsPerPage)}
+              onValueChange={(val) => {
+                handlePostsPerPageChange(Number(val));
+                handlePageChange(1);
+              }}
+            >
+              <SelectTrigger className="ml-4 w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {[5, 10, 20, 50, 100].map((n) => (
+                  <SelectItem key={n} value={String(n)}>
+                    {n} per page
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         <PostPreview
           post={previewPost}

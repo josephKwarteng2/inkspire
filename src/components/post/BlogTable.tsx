@@ -42,7 +42,7 @@ const BlogTable: React.FC<BlogTableProps> = ({
   viewFilter,
 }) => {
   return (
-    <Table>
+    <Table className="bg-card">
       <PostTableHeader selectAll={selectAll} onSelectAll={onSelectAll} />
       <TableBody>
         {posts.map((post: Post) => {

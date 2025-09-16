@@ -43,7 +43,7 @@ const BlogTableRow: React.FC<PostTableRowProps> = ({
 }) => {
   return (
     <TableRow
-      className={`border-b border-border hover:bg-muted transition-colors ${
+      className={`bg-card border-b border-border hover:bg-muted transition-colors ${
         isSelected ? "bg-primary/10" : ""
       }`}
     >

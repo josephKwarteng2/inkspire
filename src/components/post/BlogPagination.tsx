@@ -96,7 +96,7 @@ const BlogPagination: React.FC<PostPaginationProps> = ({
     return items;
   };
 
-  if (totalPosts === 0 || totalPages <= 1) {
+  if (totalPosts === 0) {
     return null;
   }
 
