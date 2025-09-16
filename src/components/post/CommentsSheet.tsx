@@ -11,13 +11,14 @@ import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
 import type { Comment } from "@/types/comment";
 import { v4 as uuidv4 } from "uuid";
 import React from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface CommentsSheetProps {
   postId: string;
 }
 
 const CommentsSheet: React.FC<CommentsSheetProps> = ({ postId }) => {
-  const [comments, setComments] = React.useState<Comment[]>([]);
+  const queryClient = useQueryClient();
   const [author, setAuthor] = React.useState("");
   const [content, setContent] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -26,24 +27,13 @@ const CommentsSheet: React.FC<CommentsSheetProps> = ({ postId }) => {
   const [error, setError] = React.useState("");
   const [replyTo, setReplyTo] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
-    setComments(
+  const { data: comments = [] } = useQuery<Comment[]>({
+    queryKey: ["comments", postId],
+    queryFn: () =>
       getAllComments().filter(
         (c) => c.postId === postId && c.status === "approved"
-      )
-    );
-  }, [postId]);
-
-  React.useEffect(() => {
-    if (success) {
-      setComments(
-        getAllComments().filter(
-          (c) => c.postId === postId && c.status === "approved"
-        )
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [success]);
+      ),
+  });
 
   type CommentTree = Comment & { replies: CommentTree[] };
 
@@ -60,6 +50,16 @@ const CommentsSheet: React.FC<CommentsSheetProps> = ({ postId }) => {
     });
     return roots;
   }
+
+  const addCommentMutation = useMutation({
+    mutationFn: (newComment: Comment) => {
+      addComment(newComment);
+      return Promise.resolve();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", postId] });
+    },
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,13 +80,20 @@ const CommentsSheet: React.FC<CommentsSheetProps> = ({ postId }) => {
       createdAt: new Date().toISOString(),
       parentId: replyTo || undefined,
     };
-    addComment(newComment);
-    setAuthor("");
-    setEmail("");
-    setContent("");
-    setSuccess("Comment submitted for review.");
-    setSubmitting(false);
-    setReplyTo(null);
+    addCommentMutation.mutate(newComment, {
+      onSuccess: () => {
+        setAuthor("");
+        setEmail("");
+        setContent("");
+        setSuccess("Comment submitted for review.");
+        setSubmitting(false);
+        setReplyTo(null);
+      },
+      onError: () => {
+        setError("Failed to submit comment.");
+        setSubmitting(false);
+      },
+    });
   };
 
   const REACTIONS_KEY = "comment-reactions-user";
@@ -113,6 +120,22 @@ const CommentsSheet: React.FC<CommentsSheetProps> = ({ postId }) => {
   React.useEffect(() => {
     setUserReactions(getUserReactions());
   }, []);
+
+  const updateCommentMutation = useMutation({
+    mutationFn: ({
+      commentId,
+      reactions,
+    }: {
+      commentId: string;
+      reactions: Record<string, number>;
+    }) => {
+      updateComment(commentId, { reactions });
+      return Promise.resolve();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", postId] });
+    },
+  });
 
   function handleReaction(commentId: string, emoji: string) {
     const prevReactions = getUserReactions();
@@ -141,13 +164,8 @@ const CommentsSheet: React.FC<CommentsSheetProps> = ({ postId }) => {
     }
     newComments[idx] = comment;
     saveUserReactions(newReactions);
-    updateComment(commentId, { reactions: comment.reactions });
+    updateCommentMutation.mutate({ commentId, reactions: comment.reactions });
     setUserReactions(newReactions);
-    setComments(
-      getAllComments().filter(
-        (c) => c.postId === postId && c.status === "approved"
-      )
-    );
   }
   function stringToColor(str: string) {
     let hash = 0;

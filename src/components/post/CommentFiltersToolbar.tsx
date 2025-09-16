@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -62,8 +62,8 @@ const CommentFiltersToolbar: React.FC<CommentFiltersToolbarProps> = ({
   onClearFilters,
   loading = false,
 }) => {
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showSpamConfirm, setShowSpamConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
+  const [showSpamConfirm, setShowSpamConfirm] = React.useState(false);
 
   const handleDelete = () => {
     setShowDeleteConfirm(false);

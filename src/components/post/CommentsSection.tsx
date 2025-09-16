@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAllComments, addComment } from "@/lib/commentsStorage";
 import type { Comment } from "@/types/comment";
@@ -10,12 +10,12 @@ interface CommentsSectionProps {
 
 const CommentsSection: React.FC<CommentsSectionProps> = ({ postId }) => {
   const queryClient = useQueryClient();
-  const [author, setAuthor] = useState("");
-  const [email, setEmail] = useState("");
-  const [content, setContent] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState("");
-  const [error, setError] = useState("");
+  const [author, setAuthor] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [content, setContent] = React.useState("");
+  const [submitting, setSubmitting] = React.useState(false);
+  const [success, setSuccess] = React.useState("");
+  const [error, setError] = React.useState("");
 
   const { data: comments = [] } = useQuery<Comment[]>({
     queryKey: ["comments", postId],
