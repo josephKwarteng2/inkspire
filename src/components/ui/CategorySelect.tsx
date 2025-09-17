@@ -10,6 +10,7 @@ interface CategorySelectProps {
   category: string;
   setCategory: (category: string) => void;
   categories: string[];
+  error?: string;
 }
 
 export const CategorySelect: React.FC<CategorySelectProps> = ({
