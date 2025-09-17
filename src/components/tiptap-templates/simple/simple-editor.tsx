@@ -25,6 +25,9 @@ import {
 
 // --- Tiptap Node ---
 import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension";
+import { VideoNode } from "@/components/tiptap-node/video-node/video-node-extension";
+import { AudioNode } from "@/components/tiptap-node/audio-node/audio-node-extension";
+import { FileNode } from "@/components/tiptap-node/file-node/file-node-extension";
 import { HorizontalRule } from "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension";
 import "@/components/tiptap-node/blockquote-node/blockquote-node.scss";
 import "@/components/tiptap-node/code-block-node/code-block-node.scss";
@@ -68,7 +71,6 @@ import { useCursorVisibility } from "@/hooks/use-cursor-visibility";
 import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle";
 
 // --- Lib ---
-import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
 
 // --- Styles ---
 import "@/components/tiptap-templates/simple/simple-editor.scss";
@@ -77,10 +79,16 @@ const MainToolbarContent = ({
   onHighlighterClick,
   onLinkClick,
   isMobile,
+  handleInsertVideo,
+  handleInsertAudio,
+  handleInsertFile,
 }: {
   onHighlighterClick: () => void;
   onLinkClick: () => void;
   isMobile: boolean;
+  handleInsertVideo: () => void;
+  handleInsertAudio: () => void;
+  handleInsertFile: () => void;
 }) => {
   return (
     <>
@@ -138,6 +146,15 @@ const MainToolbarContent = ({
 
       <ToolbarGroup>
         <ImageUploadButton text="Add" />
+        <Button type="button" onClick={handleInsertVideo}>
+          Video
+        </Button>
+        <Button type="button" onClick={handleInsertAudio}>
+          Audio
+        </Button>
+        <Button type="button" onClick={handleInsertFile}>
+          File
+        </Button>
       </ToolbarGroup>
 
       <Spacer />
@@ -203,40 +220,63 @@ export function SimpleEditor({
         autocorrect: "off",
         autocapitalize: "off",
         "aria-label": "Main content area, start typing to enter text.",
-        class: "simple-editor",
       },
     },
     extensions: [
-      StarterKit.configure({
-        horizontalRule: false,
-        link: {
-          openOnClick: false,
-          enableClickSelection: true,
-        },
-      }),
-      HorizontalRule,
-      TextAlign.configure({ types: ["heading", "paragraph"] }),
-      TaskList,
-      TaskItem.configure({ nested: true }),
-      Highlight.configure({ multicolor: true }),
+      StarterKit,
       Image,
+      TaskList,
+      TaskItem,
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
       Typography,
-      Superscript,
+      Highlight,
       Subscript,
+      Superscript,
       Selection,
-      ImageUploadNode.configure({
-        accept: "image/*",
-        maxSize: MAX_FILE_SIZE,
-        limit: 3,
-        upload: handleImageUpload,
-        onError: (error) => console.error("Upload failed:", error),
-      }),
+      ImageUploadNode,
+      VideoNode,
+      AudioNode,
+      FileNode,
+      HorizontalRule,
     ],
     content: value,
     onUpdate: ({ editor }) => {
       onChange?.(editor.getHTML());
     },
   });
+
+  // Handlers for inserting video, audio, and file
+  const handleInsertVideo = () => {
+    const url = window.prompt("Enter video URL:");
+    if (url && editor) {
+      editor
+        .chain()
+        .focus()
+        .insertContent({ type: "video", attrs: { src: url, controls: true } })
+        .run();
+    }
+  };
+  const handleInsertAudio = () => {
+    const url = window.prompt("Enter audio URL:");
+    if (url && editor) {
+      editor
+        .chain()
+        .focus()
+        .insertContent({ type: "audio", attrs: { src: url, controls: true } })
+        .run();
+    }
+  };
+  const handleInsertFile = () => {
+    const url = window.prompt("Enter file URL:");
+    const name = window.prompt("Enter file name:");
+    if (url && name && editor) {
+      editor
+        .chain()
+        .focus()
+        .insertContent({ type: "file", attrs: { href: url, name } })
+        .run();
+    }
+  };
 
   const rect = useCursorVisibility({
     editor,
@@ -275,6 +315,9 @@ export function SimpleEditor({
               onHighlighterClick={() => setMobileView("highlighter")}
               onLinkClick={() => setMobileView("link")}
               isMobile={isMobile}
+              handleInsertVideo={handleInsertVideo}
+              handleInsertAudio={handleInsertAudio}
+              handleInsertFile={handleInsertFile}
             />
           ) : (
             <MobileToolbarContent
@@ -284,11 +327,13 @@ export function SimpleEditor({
           )}
         </Toolbar>
 
-        <EditorContent
-          editor={editor}
-          role="presentation"
-          className="simple-editor-content"
-        />
+        {editor && (
+          <EditorContent
+            editor={editor}
+            role="presentation"
+            className="simple-editor-content"
+          />
+        )}
       </EditorContext.Provider>
     </div>
   );
