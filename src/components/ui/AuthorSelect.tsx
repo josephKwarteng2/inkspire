@@ -11,6 +11,7 @@ interface AuthorSelectProps {
   author: string;
   setAuthor: (author: string) => void;
   users: { id: string; name: string }[];
+  error?: string;
 }
 
 export const AuthorSelect: React.FC<AuthorSelectProps> = ({
