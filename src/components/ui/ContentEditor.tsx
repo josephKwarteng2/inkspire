@@ -3,6 +3,7 @@ import { SimpleEditor } from "../tiptap-templates/simple/simple-editor";
 interface ContentEditorProps {
   content: string;
   setContent: (content: string) => void;
+  error?: string;
 }
 
 export const ContentEditor: React.FC<ContentEditorProps> = ({
