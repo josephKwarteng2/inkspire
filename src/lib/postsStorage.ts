@@ -14,5 +14,21 @@ export function getAllPosts(): Post[] {
 
 export function saveAllPosts(posts: Post[]) {
   if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+  } catch (e: unknown) {
+    if (
+      e &&
+      typeof e === "object" &&
+      (("name" in e &&
+        (e as { name?: string }).name === "QuotaExceededError") ||
+        ("code" in e && (e as { code?: number }).code === 22))
+    ) {
+      alert(
+        "Error: Local storage is full. Please delete some posts or clear your browser storage."
+      );
+    } else {
+      throw e;
+    }
+  }
 }
