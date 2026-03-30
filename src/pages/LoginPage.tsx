@@ -30,7 +30,9 @@ export default function LoginPage() {
       >
         <h2 className="text-2xl font-bold mb-2 text-center">Sign In</h2>
         <div>
-          <label className="block text-sm font-medium mb-1">Username</label>
+          <label htmlFor="username" className="block text-sm font-medium mb-1">
+            Username
+          </label>
           <input
             className="w-full px-3 py-2 border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             value={username}
@@ -40,7 +42,9 @@ export default function LoginPage() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Role</label>
+          <label htmlFor="role" className="block text-sm font-medium mb-1">
+            Role
+          </label>
           <select
             className="w-full px-3 py-2 border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             value={selectedRole}
