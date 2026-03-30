@@ -1,6 +1,7 @@
 interface FeaturedImageInputProps {
   featuredImage: string;
   setFeaturedImage: (image: string) => void;
+  error?: string;
 }
 
 export const FeaturedImageInput: React.FC<FeaturedImageInputProps> = ({

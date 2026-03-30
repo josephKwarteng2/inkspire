@@ -141,6 +141,7 @@ const InkspireHeader = () => {
           </div>
         )}
       </div>
+      <p></p>
     </header>
   );
 };

@@ -1,13 +1,11 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
 } from "react-router-dom";
-
 import LoginPage from "@/pages/LoginPage";
-import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { UserRoleProvider } from "@/context/UserRoleContext";
@@ -18,6 +16,7 @@ const Blog = lazy(() => import("@/pages/Blog"));
 const AboutUs = lazy(() => import("@/pages/AboutUs"));
 const ContactUs = lazy(() => import("@/pages/ContactUs"));
 const PostDetail = lazy(() => import("@/pages/BlogDetail"));
+const Bookmarks = lazy(() => import("@/pages/reader/Bookmarks"));
 const AdminDashboard = lazy(() => import("@/pages/admin/Dashboard"));
 const AdminPosts = lazy(() => import("@/pages/admin/Blogs"));
 const AdminAnalytics = lazy(() => import("@/pages/admin/Analytics"));
@@ -59,7 +58,6 @@ const AppRoutes = () => (
           <Suspense fallback={<div className="p-8">Loading...</div>}>
             <Routes>
               <Route path="/login" element={<LoginPage />} />
-              {/* Public routes */}
               <Route
                 path="/"
                 element={
@@ -91,6 +89,16 @@ const AppRoutes = () => (
                 }
               />
               <Route
+                path="/bookmarks"
+                element={
+                  <RequireAuth>
+                    <Layout>
+                      <Bookmarks />
+                    </Layout>
+                  </RequireAuth>
+                }
+              />
+              <Route
                 path="/contact-us"
                 element={
                   <RequireAuth>
@@ -110,7 +118,6 @@ const AppRoutes = () => (
                   </RequireAuth>
                 }
               />
-              {/* Admin routes with Next.js-style layout */}
               <Route
                 path="/admin/*"
                 element={
@@ -121,12 +128,10 @@ const AppRoutes = () => (
                   </RequireAuth>
                 }
               />
-              {/* Default redirect */}
               <Route
                 path="/admin"
                 element={<Navigate to="/admin/dashboard" replace />}
               />
-              {/* 404 */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

@@ -18,11 +18,22 @@ export interface Post {
   metaTitle?: string;
   metaDescription?: string;
   metaKeywords?: string[];
+  videoEmbed?: string;
+  audioEmbeds?: string[];
+  attachments?: Attachment[];
   trashed: boolean;
   createdAt?: string;
   updatedAt?: string;
   revisions?: PostRevision[];
   featured?: boolean;
+  excerpt?: string;
+}
+
+export interface Attachment {
+  name: string;
+  url: string;
+  type: string; // MIME type
+  size: number; // in bytes
 }
 
 export interface PostRevision {

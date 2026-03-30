@@ -9,6 +9,7 @@ interface TagInputProps {
   tagSuggestions: string[];
   activeSuggestion: number;
   disabled?: boolean;
+  error?: string;
 }
 
 export const TagInput: React.FC<TagInputProps> = ({

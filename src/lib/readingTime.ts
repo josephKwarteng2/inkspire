@@ -1,4 +1,3 @@
-// Returns reading time in minutes (rounded up)
 export function getReadingTime(text: string): number {
   const wordsPerMinute = 200;
   const words = text.trim().split(/\s+/).length;

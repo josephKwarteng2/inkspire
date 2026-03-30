@@ -7,6 +7,11 @@ interface MetaFieldsProps {
   setMetaDescription: (description: string) => void;
   metaKeywords: string;
   setMetaKeywords: (keywords: string) => void;
+  errors?: {
+    metaTitle?: string;
+    metaDescription?: string;
+    metaKeywords?: string;
+  };
 }
 
 export const MetaFields: React.FC<MetaFieldsProps> = ({

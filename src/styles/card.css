@@ -1,0 +1,4 @@
+/* Card background utility for tables and other elements */
+.bg-card {
+  background-color: var(--card);
+}

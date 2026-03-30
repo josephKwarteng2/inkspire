@@ -18,8 +18,9 @@ import {
   SidebarSeparator,
   SidebarInset,
   SidebarFooter,
+  useSidebar,
 } from "@/components/ui/sidebar";
-import { useSidebar } from "@/components/ui/sidebar";
+
 import { useNavigate, useLocation } from "react-router-dom";
 
 const SidebarCollapseButton = () => {
@@ -53,7 +54,7 @@ interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
-function LayoutInner({ children }: AdminLayoutProps) {
+function LayoutInner({ children }: Readonly<AdminLayoutProps>) {
   const navigate = useNavigate();
   const location = useLocation();
   const { state } = useSidebar();
@@ -114,7 +115,7 @@ function LayoutInner({ children }: AdminLayoutProps) {
                 tooltip="Posts"
               >
                 <FileText className="w-4 h-4" />
-                <span>Posts</span>
+                <span>Blog Posts</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>

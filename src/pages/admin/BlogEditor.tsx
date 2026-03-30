@@ -1,14 +1,19 @@
 import React from "react";
-import PostForm from "@/components/post/BlogForm";
+import BlogForm from "@/components/post/BlogForm";
 import { useParams, useNavigate } from "react-router-dom";
 import { categories as defaultCategories } from "@/data/categories";
 import type { Post } from "@/types/post";
 import { v4 as uuidv4 } from "uuid";
 import { getAllPosts, saveAllPosts } from "@/lib/postsStorage";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Loader2, ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
 
-function levenshtein(a: string, b: string): number {
+const levenshteinDistance = (a: string, b: string): number => {
   const matrix = Array.from({ length: a.length + 1 }, (_, i) => [i]);
   for (let j = 1; j <= b.length; j++) matrix[0][j] = j;
+
   for (let i = 1; i <= a.length; i++) {
     for (let j = 1; j <= b.length; j++) {
       if (a[i - 1] === b[j - 1]) {
@@ -23,154 +28,267 @@ function levenshtein(a: string, b: string): number {
     }
   }
   return matrix[a.length][b.length];
-}
+};
 
-const BlogEditorContent: React.FC = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+const normalizeText = (text: string): string =>
+  text.replace(/\s+/g, " ").trim().toLowerCase();
 
-  const [posts, setPosts] = React.useState<Post[]>([]);
-  const isEdit = Boolean(id && id !== "new");
+const calculateContentSimilarity = (
+  content1: string,
+  content2: string
+): number => {
+  const a = normalizeText(content1);
+  const b = normalizeText(content2);
+  const minLen = Math.min(a.length, b.length);
 
-  React.useEffect(() => {
-    const loadedPosts = getAllPosts();
-    setPosts(loadedPosts);
-  }, []);
+  if (minLen < 30) return 0;
 
-  const postToEdit = isEdit ? posts.find((p) => p.id === id) : undefined;
+  let matches = 0;
+  for (let i = 0; i < minLen; i++) {
+    if (a[i] === b[i]) matches++;
+  }
 
-  const [categories] = React.useState<string[]>(() =>
-    defaultCategories.map((c) => c.title)
+  return matches / minLen;
+};
+
+const validatePostData = (
+  data: Omit<Post, "id" | "createdAt">,
+  existingPosts: Post[],
+  currentPostId?: string
+) => {
+  const errors: string[] = [];
+
+  if (!data.title?.trim()) {
+    errors.push("Title is required");
+  }
+
+  if (!data.slug?.trim()) {
+    errors.push("Slug is required");
+  }
+
+  if (!data.content?.trim()) {
+    errors.push("Content is required");
+  }
+
+  const otherPosts = existingPosts.filter((p) => p.id !== currentPostId);
+  const normalizedSlug = data.slug?.trim().toLowerCase();
+  const duplicateSlug = otherPosts.some(
+    (p) => p.slug?.trim().toLowerCase() === normalizedSlug
   );
 
-  const allTags = Array.from(new Set(posts.flatMap((p) => p.tags || [])));
-
-  const handleSubmit = (data: Omit<Post, "id" | "createdAt">) => {
-    const currentPosts = getAllPosts();
-
-    const normalizedSlug = data.slug.trim().toLowerCase();
-    const duplicateSlug = currentPosts.some(
-      (p) =>
-        p.slug &&
-        p.slug.trim().toLowerCase() === normalizedSlug &&
-        (!isEdit || p.id !== postToEdit?.id)
+  if (duplicateSlug) {
+    errors.push(
+      "A post with this slug already exists. Please choose a unique slug."
     );
+  }
+  const normalizedTitle = data.title?.trim().toLowerCase();
+  const similarTitle = otherPosts.find(
+    (p) =>
+      levenshteinDistance(p.title.trim().toLowerCase(), normalizedTitle) <= 2
+  );
 
-    if (duplicateSlug) {
-      alert(
-        "A post with the same slug already exists. Please choose a unique slug."
-      );
-      return;
-    }
-
-    const normalizedTitle = data.title.trim().toLowerCase();
-    const similarTitle = currentPosts.find(
-      (p) =>
-        (!isEdit || p.id !== postToEdit?.id) &&
-        levenshtein(p.title.trim().toLowerCase(), normalizedTitle) <= 2
+  if (similarTitle) {
+    errors.push(
+      `A post with a very similar title already exists: "${similarTitle.title}"`
     );
-
-    if (similarTitle) {
-      alert(
-        `A post with a very similar title already exists: "${similarTitle.title}". Please check for duplicates.`
-      );
-      return;
-    }
-
-    const normalizeContent = (c: string) =>
-      c.replace(/\s+/g, " ").trim().toLowerCase();
-    const contentToCheck = normalizeContent(data.content || "");
-    const similarContent = currentPosts.find(
+  }
+  if (data.content) {
+    const similarContent = otherPosts.find(
       (p) =>
-        (!isEdit || p.id !== postToEdit?.id) &&
-        p.content &&
-        contentToCheck.length > 0 &&
-        p.content.length > 0 &&
-        (() => {
-          const a = contentToCheck;
-          const b = normalizeContent(p.content);
-          const minLen = Math.min(a.length, b.length);
-          if (minLen < 30) return false;
-          let match = 0;
-          for (let i = 0; i < minLen; i++) {
-            if (a[i] === b[i]) match++;
-          }
-          return match / minLen > 0.9;
-        })()
+        p.content && calculateContentSimilarity(data.content!, p.content) > 0.9
     );
 
     if (similarContent) {
-      alert(
-        `A post with very similar content already exists (title: "${similarContent.title}"). Please check for duplicates.`
+      errors.push(
+        `A post with very similar content already exists: "${similarContent.title}"`
       );
-      return;
     }
+  }
 
-    let updatedPosts: Post[];
+  return errors;
+};
 
-    if (isEdit && postToEdit) {
-      updatedPosts = currentPosts.map((p) =>
-        p.id === postToEdit.id
-          ? {
-              ...p,
-              ...data,
-              updatedAt: new Date().toISOString(),
-              status: data.status,
-              scheduledDate:
-                data.status === "scheduled" ? data.scheduledDate : undefined,
+const BlogEditorContent: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const isEdit = Boolean(id && id !== "new");
+
+  const {
+    data: posts = [],
+    isLoading: postsLoading,
+    error: postsError,
+  } = useQuery({
+    queryKey: ["posts"],
+    queryFn: getAllPosts,
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+  });
+
+  const postToEdit = React.useMemo(
+    () => (isEdit ? posts.find((p) => p.id === id) : undefined),
+    [posts, isEdit, id]
+  );
+
+  const categories = React.useMemo(
+    () => defaultCategories.map((c) => c.title),
+    []
+  );
+
+  const allTags = React.useMemo(
+    () => Array.from(new Set(posts.flatMap((p) => p.tags || []))),
+    [posts]
+  );
+
+  const savePostMutation = useMutation({
+    mutationFn: async (data: Omit<Post, "id" | "createdAt">) => {
+      const currentPosts = await getAllPosts();
+
+      const validationErrors = validatePostData(
+        data,
+        currentPosts,
+        postToEdit?.id
+      );
+      if (validationErrors.length > 0) {
+        throw new Error(validationErrors.join("\n"));
+      }
+
+      let updatedPosts: Post[];
+
+      if (isEdit && postToEdit) {
+        updatedPosts = currentPosts.map((p) =>
+          p.id === postToEdit.id
+            ? {
+                ...p,
+                ...data,
+                updatedAt: new Date().toISOString(),
+                scheduledDate:
+                  data.status === "scheduled" ? data.scheduledDate : undefined,
+              }
+            : p
+        );
+      } else {
+        const newPost: Post = {
+          ...data,
+          id: uuidv4(),
+          createdAt: new Date().toISOString(),
+          scheduledDate:
+            data.status === "scheduled" ? data.scheduledDate : undefined,
+        };
+        updatedPosts = [newPost, ...currentPosts];
+      }
+
+      saveAllPosts(updatedPosts);
+      return updatedPosts;
+    },
+    onSuccess: (updatedPosts) => {
+      queryClient.setQueryData(["posts"], updatedPosts);
+
+      toast(`Post ${isEdit ? "updated" : "created"} successfully!`);
+
+      setTimeout(() => navigate("/admin/posts"), 300);
+    },
+    onError: (error: Error) => {
+      toast(
+        <div>
+          <strong className="text-destructive">Error</strong>
+          <div>{error.message}</div>
+        </div>
+      );
+    },
+  });
+
+  if (postsLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+          <p className="text-muted-foreground">Loading posts...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (postsError) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center space-y-4">
+          <p className="text-destructive">Error loading posts</p>
+          <Button
+            onClick={() =>
+              queryClient.invalidateQueries({ queryKey: ["posts"] })
             }
-          : p
-      );
-    } else {
-      const newPost: Post = {
-        ...data,
-        id: uuidv4(),
-        createdAt: new Date().toISOString(),
-        status: data.status,
-        scheduledDate:
-          data.status === "scheduled" ? data.scheduledDate : undefined,
-      };
-      updatedPosts = [newPost, ...currentPosts];
-    }
+          >
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
-    saveAllPosts(updatedPosts);
-    setPosts(updatedPosts);
-
-    setTimeout(() => {
-      const verification = getAllPosts();
-      console.log(
-        "[DEBUG] Post-save verification:",
-        verification.length,
-        "posts"
-      );
-      navigate("/admin/posts");
-    }, 500);
-  };
+  if (isEdit && !postToEdit) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center space-y-4">
+          <p className="text-muted-foreground">Post not found</p>
+          <Button onClick={() => navigate("/admin/posts")}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Posts
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6">
+    <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold">
-          {isEdit ? "Edit Post" : "Create New Post"}
-        </h1>
-        <button
+        <div>
+          <h1 className="text-2xl font-semibold">
+            {isEdit ? "Edit Post" : "Create New Post"}
+          </h1>
+          {postToEdit && (
+            <p className="text-sm text-muted-foreground mt-1">
+              Editing: {postToEdit.title}
+            </p>
+          )}
+        </div>
+
+        <Button
+          variant="outline"
           onClick={() => navigate("/admin/posts")}
-          className="px-4 py-2 text-sm border rounded hover:bg-muted transition w-full sm:w-auto cursor-pointer"
+          disabled={savePostMutation.isPending}
+          className="w-full sm:w-auto"
         >
+          <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Posts
-        </button>
+        </Button>
       </div>
 
-      <div className="bg-card rounded-lg border p-6 shadow-sm">
-        <PostForm
-          mode={isEdit ? "edit" : "create"}
-          initialData={postToEdit}
-          onSubmit={handleSubmit}
-          categories={categories}
-          tagSuggestions={allTags}
-        />
+      <div className="bg-card rounded-lg border shadow-sm">
+        <div className="p-6">
+          <BlogForm
+            mode={isEdit ? "edit" : "create"}
+            initialData={postToEdit}
+            onSubmit={(data) => savePostMutation.mutate(data)}
+            categories={categories}
+            tagSuggestions={allTags}
+          />
+        </div>
       </div>
+
+      {savePostMutation.isPending && (
+        <div className="fixed inset-0 bg-background/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-card p-6 rounded-lg shadow-lg border text-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+            <p className="text-sm text-muted-foreground">
+              {isEdit ? "Updating post..." : "Creating post..."}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
 export default BlogEditorContent;

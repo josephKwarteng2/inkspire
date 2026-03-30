@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 interface ScheduledDateInputProps {
   scheduledDate: string;
   setScheduledDate: (date: string) => void;
+  error?: string;
 }
 
 export const ScheduledDateInput: React.FC<ScheduledDateInputProps> = ({

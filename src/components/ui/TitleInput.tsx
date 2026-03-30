@@ -7,6 +7,7 @@ interface TitleInputProps {
   setSlug: (slug: string) => void;
   slugManuallyEdited: boolean;
   setSlugManuallyEdited: (edited: boolean) => void;
+  error?: string;
 }
 
 export const TitleInput: React.FC<TitleInputProps> = ({

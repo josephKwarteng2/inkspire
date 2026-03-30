@@ -4,6 +4,7 @@ interface SlugInputProps {
   slug: string;
   setSlug: (slug: string) => void;
   setSlugManuallyEdited: (edited: boolean) => void;
+  error?: string;
 }
 
 export const SlugInput: React.FC<SlugInputProps> = ({

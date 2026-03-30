@@ -3,7 +3,7 @@ import type { Comment } from "@/types/comment";
 const STORAGE_KEY = "comments";
 
 export function getAllComments(): Comment[] {
-  if (typeof window === "undefined") return [];
+  if (typeof globalThis.window === "undefined") return [];
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     return stored ? JSON.parse(stored) : [];
@@ -13,7 +13,7 @@ export function getAllComments(): Comment[] {
 }
 
 export function saveAllComments(comments: Comment[]) {
-  if (typeof window === "undefined") return;
+  if (typeof globalThis.window === "undefined") return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(comments));
 }
 

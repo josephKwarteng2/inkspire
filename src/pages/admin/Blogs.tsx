@@ -1,5 +1,5 @@
 import React from "react";
-import { showToast } from "@/lib/toast";
+import { toast } from "sonner";
 import { getAllPosts, saveAllPosts } from "@/lib/postsStorage";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -42,11 +42,10 @@ const BlogContent: React.FC = () => {
       if (updated) {
         saveAllPosts(updatedPosts);
         if (publishedTitles.length > 0) {
-          showToast(
+          toast.success(
             `Scheduled post${
               publishedTitles.length > 1 ? "s" : ""
-            } published: ${publishedTitles.join(", ")}`,
-            "success"
+            } published: ${publishedTitles.join(", ")}`
           );
         }
       }
@@ -112,8 +111,22 @@ const BlogContent: React.FC = () => {
     updatePostsMutation.mutate(updatedPosts);
   };
 
+  // Bulk soft delete
+  const handleBulkDelete = (ids: string[]) => {
+    const updatedPosts = posts.map((p) =>
+      ids.includes(p.id) ? { ...p, trashed: true } : p
+    );
+    updatePostsMutation.mutate(updatedPosts);
+  };
+
   const handlePermanentDelete = (id: string) => {
     const updatedPosts = posts.filter((p) => p.id !== id);
+    updatePostsMutation.mutate(updatedPosts);
+  };
+
+  // Bulk permanent delete
+  const handleBulkPermanentDelete = (ids: string[]) => {
+    const updatedPosts = posts.filter((p) => !ids.includes(p.id));
     updatePostsMutation.mutate(updatedPosts);
   };
 
@@ -181,8 +194,10 @@ const BlogContent: React.FC = () => {
             }
             onEdit={handleEdit}
             onDelete={handleDelete}
+            onBulkDelete={handleBulkDelete}
             onRestore={handleRestore}
             onPermanentDelete={handlePermanentDelete}
+            onBulkPermanentDelete={handleBulkPermanentDelete}
             onPublish={handlePublish}
             onDuplicate={handleDuplicate}
             onBulkPublish={handleBulkPublish}

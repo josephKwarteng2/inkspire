@@ -6,12 +6,13 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import type { PostStatus } from "@/types/post";
+import type { Dispatch, SetStateAction } from "react";
 
 interface StatusSelectProps {
   status: PostStatus;
-  setStatus: (status: PostStatus) => void;
+  setStatus: Dispatch<SetStateAction<PostStatus>>;
+  error?: string;
 }
-
 export const StatusSelect: React.FC<StatusSelectProps> = ({
   status,
   setStatus,
